@@ -1,25 +1,99 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Activity Monitoring Data Analysis"
+output:
+  html_document: default
+  pdf_document: default
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-## Loading and preprocessing the data
+##Loading and preprocessing the data
+
+```{r data}
+#load data
+data<-read.csv("activity.csv", header = TRUE, sep = ",", na.strings = "NA", stringsAsFactors = FALSE)
+
+#date column convert to date type
+data$datef<-as.Date(data$date)
+summary(data)
+```
 
 
+##What is mean total number of steps taken per day?
 
-## What is mean total number of steps taken per day?
+```{r SUM}
+#total steps by day
+stepday<-with(data, tapply(steps, datef, sum, na.rm=TRUE))
+hist(stepday)
+#mean of total steps by day
+mean(stepday)
+#median of total steps by day
+median(stepday)
+```
+
+##What is the average daily activity pattern?
+
+```{r pattern}
+#for each interval, average number of steps taken, averaged across all days 
+stepinterval<-with(data, tapply(steps, interval, mean, na.rm=TRUE))
+
+#Make a time series plot (type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+plot(stepinterval, type = 'l', xlab = "5-minute interval", ylab = "average number of steps taken")
+
+#Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+which(stepinterval == max(stepinterval), arr.ind = T)
+```
+
+##Imputing missing values. 
+
+```{r imputing}
+#Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+summary(data$steps=="NA")
+
+#Devise a strategy for filling in all of the missing values in the dataset. The strategy to use the mean for that 5-minute interval.
+stepintervalf<-as.data.frame.table(stepinterval)
+names(stepintervalf)<-c("interval", "mean")
+
+#Create a new dataset that is equal to the original dataset but with the missing data filled in.
+newdata<-data
+for (i in 1:nrow(newdata)) {
+  if (is.na(newdata$steps[i]))  {
+    newdata$steps[i] = stepintervalf[which(newdata$interval[i]==stepintervalf$interval), ]$mean
+      }
+}
+
+#total number of steps taken each day 
+newstepday<-with(newdata, tapply(steps, datef, sum, na.rm=TRUE))
+
+hist(newstepday)
+mean(newstepday)
+median(newstepday)
+
+```
+
+Do these values differ from the estimates from the first part of the assignment?   YES.  
+What is the impact of imputing missing data on the estimates of the total daily number of steps?  
+It increased the total daily number of steps on some days. For example, 10/01 before 0 after 10766.
 
 
+##Are there differences in activity patterns between weekdays and weekends?
 
-## What is the average daily activity pattern?
+```{r weekdayweekend patterns}
+#Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+newdata$day<-ifelse(weekdays(newdata$datef) == "Saturday" | weekdays(newdata$datef) == "Sunday", "Weekend", "Weekday")
+newdata$day <- factor(newdata$day)
 
 
+#Make a panel plot containing a time series plot (type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
-## Imputing missing values
+newstepinterval<-aggregate(steps ~ interval + day, data = newdata, mean)
+
+library(ggplot2)
+ggplot(newstepinterval, aes(interval, steps))+geom_line()+facet_grid(day~.) +xlab("5-minute interval")+ylab("average number of steps taken")
+
+```
 
 
-
-## Are there differences in activity patterns between weekdays and weekends?
