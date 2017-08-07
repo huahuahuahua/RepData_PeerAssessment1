@@ -151,6 +151,6 @@ library(ggplot2)
 ggplot(newstepinterval, aes(interval, steps))+geom_line()+facet_grid(day~.) +xlab("5-minute interval")+ylab("average number of steps taken")
 ```
 
-![](PA1_template_files/figure-html/weekdayweekend patterns-1.png)<!-- -->
+![](PA1_template_files/figure-html/weekdayweekend_patterns-1.png)<!-- -->
 
 

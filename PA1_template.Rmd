@@ -81,7 +81,7 @@ It increased the total daily number of steps on some days. For example, 10/01 be
 
 ##Are there differences in activity patterns between weekdays and weekends?
 
-```{r weekdayweekend patterns}
+```{r weekdayweekend_patterns}
 #Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
 newdata$day<-ifelse(weekdays(newdata$datef) == "Saturday" | weekdays(newdata$datef) == "Sunday", "Weekend", "Weekday")
